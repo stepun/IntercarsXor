@@ -25,12 +25,11 @@ implementation
 {$R *.DFM}
 
 
-procedure decoder( const AName: String );
+procedure decoder( const AName: String; const SExist: String );
 type
   PByteArray = Array of Byte;
 var
   ii: Integer;
-  y: Integer;
 begin
   with TMemoryStream.Create do
   try
@@ -41,7 +40,7 @@ begin
        PByteArray( Memory )[ ii ] := PByteArray( Memory )[ ii ] xor 65 {p};
     end;
     createDir('decoded');
-    SaveToFile( ChangeFileExt( 'decoded\'+AName, '.dbf' ));
+    SaveToFile( ChangeFileExt( 'decoded\'+AName, SExist ));
 
   finally
     Free;
@@ -51,24 +50,54 @@ end;
 procedure TForm1.btnStartClick(Sender: TObject);
 var
   SR: TSearchRec;
+  SR2: TSearchRec;
+  SR3: TSearchRec;
 begin
-Form1.ProgressBar1.Min := 1;
-Form1.ProgressBar1.Max := 35;
-Form1.ProgressBar1.Step := 1;
-Form1.ProgressBar1.StepBy(1);
-if FindFirst('*.dbf', faAnyFile, SR) = 0 then
+  Form1.ProgressBar1.Min := 1;
+  Form1.ProgressBar1.Max := 75;
+  Form1.ProgressBar1.Step := 1;
+  Form1.ProgressBar1.StepBy(1);
+
+  if FindFirst('*.dbf', faAnyFile, SR) = 0 then
   begin
     repeat
       if (SR.Attr <> faDirectory) then
       begin
-        decoder(SR.Name);
+        decoder(SR.Name, '.dbf');
         Form1.ProgressBar1.StepIt;
       end;
     until FindNext(SR) <> 0;
     FindClose(SR);
   end;
-  Form1.ProgressBar1.StepBy(35);
+
+
+  if FindFirst('*.cdx', faAnyFile, SR2) = 0 then
+  begin
+    repeat
+      if (SR2.Attr <> faDirectory) then
+      begin
+        decoder(SR2.Name, '.cdx');
+        Form1.ProgressBar1.StepIt;
+      end;
+    until FindNext(SR2) <> 0;
+    FindClose(SR2);
+  end;
+
+  if FindFirst('*.fpt', faAnyFile, SR3) = 0 then
+  begin
+    repeat
+      if (SR3.Attr <> faDirectory) then
+      begin
+        decoder(SR3.Name, '.fpt');
+        Form1.ProgressBar1.StepIt;
+      end;
+    until FindNext(SR3) <> 0;
+    FindClose(SR3);
+  end;
+
+  Form1.ProgressBar1.StepBy(75);
   ShowMessage('Decoded completed!');
 end;
+
 
 end.
